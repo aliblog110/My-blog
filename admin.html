@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VIP Admin - Final</title>
+<style>
+body{background:#0f172a; color:#fff; font-family:sans-serif; padding:15px}
+.box{max-width:680px; margin:auto; background:#fff; color:#000; padding:20px; border-radius:15px}
+select,input,textarea{width:100%; padding:12px; margin:8px 0; border:1px solid #ccc; border-radius:8px; box-sizing:border-box; font-size:15px}
+button{width:100%; padding:14px; background:#16a34a; color:#fff; border:none; border-radius:8px; font-size:18px; font-weight:bold; margin-top:10px; cursor:pointer}
+label{font-weight:bold; margin-top:10px; display:block}
+#out{display:none; margin-top:15px; background:#e2e8f0; padding:12px; border-radius:8px}
+.hint{font-size:13px; color:#64748b; background:#f8fafc; padding:8px; border-radius:6px; margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class="box">
+<h2 style="text-align:center">🟢 Anjuman VIP Admin - Final</h2>
+
+<label>Kaam Chunno:</label>
+<select id="type" onchange="show()">
+<option value="top">0 - Upar Rozy Wali Pic Change Karna</option>
+<option value="news">1 - Post (Image + Likhai)</option>
+<option value="pdf">2 - PDF Upload</option>
+<option value="album">3 - Photos Album</option>
+</select>
+
+<!-- 0 TOP IMAGE -->
+<div id="f_top">
+<div class="hint">Is se blog ke upar wali Rozy ki photo change hogi. Nayi image ka link dalo.</div>
+<input id="top_link" placeholder="Rozy ki nayi image ka Link (https://...)">
+</div>
+
+<!-- 1 NEWS -->
+<div id="f_news" style="display:none">
+<input id="t1" placeholder="Post ka Title">
+<textarea id="d1" rows="5" placeholder="Post ki tafseel / Likhai"></textarea>
+<input id="i1" placeholder="Post ke liye Image ka Link (optional)">
+</div>
+
+<!-- 2 PDF -->
+<div id="f_pdf" style="display:none">
+<input id="t2" placeholder="PDF ka Title (Jaise: Majlis ka PDF)">
+<input id="l2" placeholder="PDF ka Link (https://...)">
+</div>
+
+<!-- 3 ALBUM -->
+<div id="f_album" style="display:none">
+<input id="t3" placeholder="
