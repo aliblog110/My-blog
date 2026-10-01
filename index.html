@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#167b9e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="انجمن صدائے امام">
+<title>انجمن صدائے امام</title>
+<link rel="manifest" href="manifest.json">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f0f2f5;color:#222;font-family:system-ui,-apple-system,"Segoe UI",Arial,"Noto Nastaliq Urdu",sans-serif;line-height:1.6}
+.wrap{max-width:640px;margin:0 auto;background:#fff;min-height:100vh;box-shadow:0 0 30px rgba(0,0,0,.08)}
+.head{text-align:center;padding:16px 12px 10px;background:linear-gradient(135deg,#167b9e,#0d526a);color:#fff}
+.date{font-size:15px;opacity:.9}
+.name{font-size:26px;font-weight:700;margin-top:4px;letter-spacing:.5px}
+.banner{width:100%;height:200px;object-fit:cover;background:#ddd;display:block}
+.nav{display:flex;align-items:center;justify-content:space-around;background:#1a1d21;color:#fff;height:52px;font-size:22px;border-bottom:3px solid #159dc4}
+.content{padding:18px 16px 30px}
+.title{border-right:4px solid #159dc4;padding-right:10px;font-size:20px;font-weight:700;margin:18px 0 14px;color:#0d526a}
+.post,.media-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.post img,.media-card img{max-width:100%;display:block;margin:0 auto 12px;border-radius:8px}
+.post h2,.media-card h2{font-size:20px;margin:0 0 8px;color:#111}
+.post p,.media-card p{font-size:16px;line-height:1.85;white-space:pre-wrap;color:#333}
+.meta{color:#6b7280;font-size:13px;margin-bottom:8px}
+.media-section{margin-top:8px}
+.media-card video{width:100%;max-height:420px;border-radius:8px;background:#000}
+.media-card audio{width:100%;margin-top:8px}
+.media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:10px}
+.media-grid img{width:100%;height:140px;object-fit:cover;border-radius:8px}
+.media-btn{display:inline-block;padding:10px 18px;background:#159dc4;color:#fff;text-decoration:none;border-radius:8px;margin-top:8px;font-weight:600;border:0;cursor:pointer;font-size:15px}
+.share{display:flex;height:48px;margin:24px 0 10px;border-radius:10px;overflow:hidden}
+.share div{flex:1;display:flex;align-items:center;justify-content:center;color:#fff;font:bold 15px system-ui;cursor:pointer}
+.x{background:#111}.fb{background:#1877f2}.wa{background:#25d366}.sms{background:#159dc4}
+footer{text-align:center;padding:20px;border-top:1px solid #eee;color:#9ca3af;font-size:13px}
+.empty{text-align:center;padding:40px 20px;color:#6b7280}
+.empty h2{font-size:20px;margin-bottom:8px;color:#374151}
+@media (max-width:480px){
+  .name{font-size:22px}
+  .banner{height:160px}
+  .post h2,.media-card h2{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="head">
+    <div class="date" id="date"></div>
+    <div class="name">انجمن صدائے امام</div>
+  </header>
+  <img class="banner" id="bannerImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='300'%3E%3Crect fill='%23d1d5db' width='800' height='300'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%236b7280' font-size='28' font-family='Arial'%3Eروضہ کی تصویر%3C/text%3E%3C/svg%3E" alt="روضہ">
+  <nav class="nav">
+    <span title="تلاش">⌕</span>
+    <span title="مینو">☰</span>
+    <span title="ہوم">⌂</span>
+  </nav>
+  <main class="content">
+    <div class="title">تازہ ترین</div>
+    <section id="posts"></section>
+    <div id="mediaContent"></div>
+    <div class="share">
+      <div class="x" onclick="share('x')">X</div>
+      <div class="fb" onclick="share('fb')">f</div>
+      <div class="wa" onclick="share('wa')">WhatsApp</div>
+      <div class="sms" onclick="share('sms')">SMS</div>
+    </div>
+  </main>
+  <footer>© انجمن صدائے امام</footer>
+</div>
+
+<script>
+const KEY = 'anjuman_', DB = 'anjuman_media_db', STORE = 'media';
+const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+const arr = k => JSON.parse(localStorage.getItem(KEY + k) || '[]');
+
+// Banner
+const b = localStorage.getItem('anjuman_banner');
+if (b) document.getElementById('bannerImg').src = b;
+
+// Date
+const days = ['اتوار','پیر','منگل','بدھ','جمعرات','جمعہ','ہفتہ'];
+const months = ['جنوری','فروری','مارچ','اپریل','مئی','جون','جولائی','اگست','ستمبر','اکتوبر','نومبر','دسمبر'];
+const d = new Date();
+document.getElementById('date').textContent = days[d.getDay()] + '، ' + d.getDate() + ' ' + months[d.getMonth()] + '، ' + d.getFullYear() + 'ء';
+
+function renderPosts() {
+  const box = document.getElementById('posts');
+  const p = arr('posts');
+  if (!p.length) {
+    box.innerHTML = `<div class="empty"><h2>انجمن صدائے امام میں خوش آمدید</h2><p>یہاں آپ کی تازہ خبریں اور مضامین ظاہر ہوں گے۔</p></div>`;
+    return;
+  }
+  box.innerHTML = p.map(x => `
+    <article class="post">
+      ${x.image ? `<img src="${x.image}" alt="">` : ''}
+      <h2>${esc(x.title)}</h2>
+      <div class="meta">${esc(x.date || '')}</div>
+      <p>${esc(x.body)}</p>
+    </article>`).join('');
+}
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const r = indexedDB.open(DB, 1);
+    r.onupgradeneeded = () => {
+      if (!r.result.objectStoreNames.contains(STORE)) r.result.createObjectStore(STORE);
+    };
+    r.onsuccess = () => resolve(r.result);
+    r.onerror = () => reject(r.error);
+  });
+}
+
+async function getBlob(k) {
+  const db = await openDB();
+  return new Promise((res, rej) => {
+    const q = db.transaction(STORE, 'readonly').objectStore(STORE).get(k);
+    q.onsuccess = () => res(q.result || null);
+    q.onerror = () => rej(q.error);
+  });
+}
+
+async function loadMedia() {
+  const box = document.getElementById('mediaContent');
+  const pdfs = arr('pdfs'), videos = arr('videos'), audios = arr('audios'), albums = arr('albums');
+  let h = '';
+
+  if (videos.length) {
+    h += '<section class="media-section"><div class="title">🎥 ویڈیوز</div>';
+    videos.forEach(v => {
+      h += `<article class="media-card">
+        ${v.thumbnail ? `<img src="${v.thumbnail}" alt="">` : ''}
+        <h2>${esc(v.title)}</h2>
+        <p>${esc(v.desc || '')}</p>
+        <video controls preload="metadata" poster="${v.thumbnail || ''}" data-key="${esc(v.mediaKey)}"></video>
+      </article>`;
+    });
+    h += '</section>';
+  }
+
+  if (audios.length) {
+    h += '<section class="media-section"><div class="title">🎧 آڈیوز</div>';
+    audios.forEach(a => {
+      h += `<article class="media-card">
+        ${a.thumbnail ? `<img src="${a.thumbnail}" alt="">` : ''}
+        <h2>${esc(a.title)}</h2>
+        <p>${esc(a.desc || '')}</p>
+        <audio controls data-key="${esc(a.mediaKey)}"></audio>
+      </article>`;
+    });
+    h += '</section>';
+  }
+
+  if (pdfs.length) {
+    h += '<section class="media-section"><div class="title">📄 PDFs</div>';
+    pdfs.forEach(p => {
+      h += `<article class="media-card">
+        ${p.thumbnail ? `<img src="${p.thumbnail}" alt="">` : ''}
+        <h2>${esc(p.title)}</h2>
+        <p>${esc(p.desc || '')}</p>
+        <button class="media-btn" data-pdf="${esc(p.mediaKey)}">PDF دیکھیں</button>
+      </article>`;
+    });
+    h += '</section>';
+  }
+
+  if (albums.length) {
+    h += '<section class="media-section"><div class="title">🖼️ Photo Albums</div>';
+    albums.forEach(a => {
+      h += `<article class="media-card">
+        <h2>${esc(a.title)}</h2>
+        <p>${esc(a.desc || '')}</p>
+        <div class="media-grid">${(a.photos || []).map(p => `<img src="${p}" alt="">`).join('')}</div>
+      </article>`;
+    });
+    h += '</section>';
+  }
+
+  box.innerHTML = h;
+
+  for (const e of box.querySelectorAll('video[data-key], audio[data-key]')) {
+    const blob = await getBlob(e.dataset.key);
+    if (blob) e.src = URL.createObjectURL(blob);
+  }
+  for (const e of box.querySelectorAll('[data-pdf]')) {
+    e.onclick = async () => {
+      const blob = await getBlob(e.dataset.pdf);
+      if (blob) window.open(URL.createObjectURL(blob), '_blank');
+      else alert('PDF data نہیں ملی');
+    };
+  }
+}
+
+function share(type) {
+  const url = encodeURIComponent(location.href);
+  const text = encodeURIComponent('انجمن صدائے امام');
+  const links = {
+    x: `https://twitter.com/intent/tweet?url=${url}&text=${text}`,
+    fb: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+    wa: `https://wa.me/?text=${text}%20${url}`,
+    sms: `sms:?body=${text}%20${url}`
+  };
+  window.open(links[type], '_blank');
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+renderPosts();
+loadMedia();
+</script>
+</body>
+</html>
